@@ -8,6 +8,9 @@ $public_ssl_hash = hiera('public_ssl')
 $database_vip    = hiera('database_vip')
 #todo(sv): change to 'keystone' as soon as keystone as node-role was ready    
 $keystones_address_map = get_node_to_ipaddr_map_by_network_role(get_nodes_hash_by_roles($network_metadata, ['primary-standalone-keystone', 'standalone-keystone']), 'keystone/api')
+$ssl_hash          = hiera_hash('use_ssl', {})
+$public_ssl_path   = get_ssl_property($ssl_hash, $public_ssl_hash, 'keystone', 'public', 'path', [''])
+
 
 if ($use_keystone) {
   $server_names        = pick(hiera_array('keystone_names', undef),
@@ -16,12 +19,7 @@ if ($use_keystone) {
                               values($keystones_address_map))
   $internal_virtual_ip = pick(hiera('service_endpoint', undef), hiera('management_vip'))
 
-  # Don't deploy on public service endpoint if SSL enabled
-  if $public_ssl_hash['services'] {
-    $public_virtual_ip = $internal_virtual_ip
-  } else {
-    $public_virtual_ip   = pick(hiera('public_service_endpoint', undef), hiera('public_vip'))
-  }
+  $public_virtual_ip   = pick(hiera('public_service_endpoint', undef), hiera('public_vip'))
 
   # configure keystone ha proxy
   class { '::openstack::ha::keystone':
@@ -29,7 +27,8 @@ if ($use_keystone) {
     ipaddresses         => $ipaddresses,
     public_virtual_ip   => $public_virtual_ip,
     server_names        => $server_names,
-    public_ssl          => false,
+    public_ssl          => true,
+    public_ssl_path     => $public_ssl_path,
   }
 
   Package['socat'] -> Class['openstack::ha::keystone']

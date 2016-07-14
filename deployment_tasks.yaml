@@ -28,7 +28,7 @@
 
 - id: keystone-haproxy
   type: puppet
-  groups: [primary-standalone-keystone, standalone-keystone, openstack-haproxy-stats]
+  groups: [primary-standalone-haproxy, primary-standalone-keystone, standalone-keystone, standalone-haproxy, openstack-haproxy-stats]
   required_for: [task-keystone, deploy_end]
   requires: [deploy_start, keystone-vip, cluster-haproxy]
   parameters:

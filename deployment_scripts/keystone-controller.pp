@@ -1,6 +1,6 @@
 notice('MODULAR: detach-keystone/keystone-controller.pp')
 
-$network_metadata = hiera('network_metadata')
+$network_metadata = hiera_hash('network_metadata')
 $access_hash      = hiera_hash('access',{})
 $service_endpoint = hiera('service_endpoint')
 $management_vip   = hiera('management_vip')
